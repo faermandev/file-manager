@@ -1,6 +1,7 @@
 package com.faermandev.file_manager.service;
 
 import com.faermandev.file_manager.dto.LoginRequest;
+import com.faermandev.file_manager.dto.LoginResponse;
 import com.faermandev.file_manager.entity.User;
 import com.faermandev.file_manager.exception.InvalidCredentialsException;
 import com.faermandev.file_manager.repository.UserRepository;
@@ -14,8 +15,9 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public User login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new InvalidCredentialsException("Invalid credentials")
@@ -27,6 +29,8 @@ public class AuthService {
         if (!passwordMatches) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
-        return user;
+
+        String token = jwtService.generateToken(user.getEmail());
+        return new LoginResponse(token, "Bearer");
     }
 }
