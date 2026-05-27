@@ -66,4 +66,15 @@ public class FileService {
         s3Service.deleteFile(file.getS3Key());
         fileRepository.delete(file);
     }
+
+    public String generateDownloadUrl(Long fileId, Long ownerId) {
+        File file = fileRepository.findById(fileId)
+                .orElseThrow(() -> new FileNotFoundException("File not found"));
+
+        if (!file.getOwner().getId().equals(ownerId)) {
+            throw new UnauthorizedFileAccessException("You don't have permission to access this file");
+        }
+
+        return s3Service.generatePresignedUrl(file.getS3Key());
+    }
 }

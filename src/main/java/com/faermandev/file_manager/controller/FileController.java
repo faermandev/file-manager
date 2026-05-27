@@ -20,6 +20,16 @@ public class FileController {
 
     private final FileService fileService;
 
+    @GetMapping("/{id}/download")
+    public ResponseEntity<String> downloadFile(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        User user = (User) authentication.getPrincipal();
+        String url = fileService.generateDownloadUrl(id, user.getId());
+        return ResponseEntity.ok(url);
+    }
+
     @GetMapping
     public ResponseEntity<List<FileResponse>> listFiles(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
